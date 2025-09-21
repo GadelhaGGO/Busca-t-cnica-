@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Busca de Operadores, X e Siglas</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6bbd6e;
+            --accent-color: #9c27b0;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, -apple-system, sans-serif;
+            margin: 0;
+            padding: 15px;
+            background-color: #f5f7fa;
+            -webkit-text-size-adjust: 100%;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            box-sizing: border-box;
+        }
+        
+        h1, h2 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--secondary-color), var(--accent-color));
+            border-radius: 3px;
+        }
+        
+        h2 {
+            font-size: 1.4rem;
+            font-weight: 500;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        .search-section {
+            margin-bottom: 30px;
+            background-color: var(--light-bg);
+            padding: 20px;
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+        
+        .search-section:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .search-box {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        input[type="text"] {
+            padding: 12px 15px;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: var(--transition);
+            background-color: #fff;
+        }
+        
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+        }
+        
+        button {
+            padding: 12px 20px;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .search-btn {
+            background-color: var(--secondary-color);
+        }
+        
+        .search-btn:hover {
+            background-color: #5aa85d;
+        }
+        
+        .toggle-btn, 
+        .toggle-btn-x, 
+        .toggle-btn-sigla {
+            background-color: var(--accent-color);
+        }
+        
+        .toggle-btn:hover,
+        .toggle-btn-x:hover,
+        .toggle-btn-sigla:hover {
+            background-color: #8a1a9c;
+        }
+        
+        .suggestions-btn {
+            background-color: var(--primary-color);
+            margin-top: 20px;
+            width: 100%;
+        }
+        
+        .suggestions-btn:hover {
+            background-color: #3a5a8a;
+        }
+        
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+        
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 10px 12px;
+            text-align: left;
+            word-break: break-word;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tr:hover {
+            background-color: #f1f3f5;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .result h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .operator-result {
+            background-color: #e8f5e9;
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .x-result {
+            background-color: #e3f2fd;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .sigla-result {
+            background-color: #f3e5f5;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .error {
+            color: #d32f2f;
+            margin-top: 10px;
+            text-align: center;
+            padding: 12px;
+            border-radius: 6px;
+            background-color: #ffebee;
+            font-size: 14px;
+            border: 1px solid #ffcdd2;
+        }
+        
+        .full-list {
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+            display: none;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .creditos {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            font-family: 'Segoe UI', Roboto, -apple-system, sans-serif;
+            font-size: 12px;
+            color: #555;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 8px 15px;
+            border-radius: 8px 0 0 0;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+            margin: 0;
+            border: 1px solid rgba(0,0,0,0.05);
+            max-width: 100%;
+            text-align: right;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .creditos {
+                color: #ccc;
+                background-color: rgba(30, 30, 30, 0.95);
+                border-color: rgba(255,255,255,0.1);
+            }
+        }
+        
+        @media (min-width: 600px) {
+            .search-box {
+                flex-direction: row;
+            }
+            
+            .search-box input[type="text"] {
+                flex: 1;
+            }
+            
+            .button-container {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .button-container button {
+                flex: 1;
+            }
+            
+            .creditos {
+                font-size: clamp(10px, 2.5vw, 14px);
+                max-width: 80%;
+            }
+        }
+        
+        /* Ícone para o botão de sugestões */
+        .icon {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+    </style>
+</head>
+<body>
+</h1><h1>Sistema de Buscas do Tráfego <img 
+  src="https://i.pinimg.com/originals/a9/36/c2/a936c2d173cb4af7a620d41222ab856a.gif" 
+  alt="GIF animado" 
+  width="50" 
+  height="25"
+></h1>
+
+        <!-- Busca de Colaboradores -->
+        <div class="search-section">
+            <h2>🕵️‍♂️ Colaboradores</h2>
+            <div class="button-container">
+                <div class="search-box">
+                    <input type="text" id="searchOperatorInput" placeholder="Ex: Gadelha, outros...">
+                    <button class="search-btn" onclick="searchOperator()">Buscar</button>
+                </div>
+                <button class="toggle-btn" onclick="toggleFullList('operators')">Mostrar Lista Completa</button>
+            </div>
+            <div id="operatorResultContainer" class="result operator-result" style="display: none;">
+                <h3>Localizado</h3>
+                <p><strong>🔎</strong> <span id="resultName"></span></p>
+                <p><strong>Descrição:</strong> <span id="resultTime"></span></p>
+            </div>
+            <div id="operatorErrorMsg" class="error" style="display: none;"></div>
+            <div id="operatorsFullList" class="full-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Horário</th>
+                        </tr>
+                    </thead>
+                    <tbody id="operatorsListBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Busca de Códigos X -->
+        <div class="search-section">
+            <h2>🕵️‍♂️ Localize o X </h2>
+            <div class="button-container">
+                <div class="search-box">
+                    <input type="text" id="searchXInput" placeholder="Ex: 40, 41...">
+                    <button class="search-btn" onclick="searchX()">Buscar</button>
+                </div>
+                <button class="toggle-btn-x" onclick="toggleFullList('xData')">Mostrar Lista Completa</button>
+            </div>
+            <div id="xResultContainer" class="result x-result" style="display: none;">
+                <h3>Localizado</h3>
+                <p><strong>🔎</strong> <span id="resultXCode"></span></p>
+                <p><strong>🚦</strong> <span id="resultXLocal"></span></p>
+            </div>
+            <div id="xErrorMsg" class="error" style="display: none;"></div>
+            <div id="xDataFullList" class="full-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>X</th>
+                            <th>Local</th>
+                        </tr>
+                    </thead>
+                    <tbody id="xDataListBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Busca de Siglas -->
+        <div class="search-section">
+            <h2>🕵️‍♂️ Siglas e Termos Técnicos</h2>
+            <div class="button-container">
+                <div class="search-box">
+                    <input type="text" id="searchSiglaInput" placeholder="Ex: Hscb...">
+                    <button class="search-btn" onclick="searchSigla()">Buscar</button>
+                </div>
+                <button class="toggle-btn-sigla" onclick="toggleFullList('siglas')">Mostrar Lista Completa</button>
+            </div>
+            <div id="siglaResultContainer" class="result sigla-result" style="display: none;">
+                <h3>Localizado</h3>
+                <p><strong>🔎</strong> <span id="resultSigla"></span></p>
+                <p><strong>Descrição:</strong> <span id="resultDescricao"></span></p>
+            </div>
+            <div id="siglaErrorMsg" class="error" style="display: none;"></div>
+            <div id="siglasFullList" class="full-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Descrição</th>
+                        </tr>
+                    </thead>
+                    <tbody id="siglasListBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Botão de Sugestões -->
+        <button class="suggestions-btn" onclick="window.open('https://forms.gle/F7F6jW1q9oNjXx277', '_blank')">
+            <svg class="icon" viewBox="0 0 24 24">
+                <path d="M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10s10-4.48,10-10S17.52,2,12,2z M12,20c-4.41,0-8-3.59-8-8s3.59-8,8-8 s8,3.59,8,8S16.41,20,12,20z M13,13h-2V7h2V13z M13,17h-2v-2h2V17z"/>
+            </svg>
+            Enviar Sugestões
+        </button>
+    
+        </button>
+
+        <!-- Botão de Grupo para Atualizações (novo) -->
+        <button class="suggestions-btn" onclick="window.open('https://chat.whatsapp.com/FUYBHMs29riCDl2BjKcqkR', '_blank')" style="margin-top: 10px;">
+            <svg class="icon" viewBox="0 0 24 24">
+                <path d="M19.05 4.91A9.816 9.816 0 0 0 12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01zm-7.01 15.24c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.264 8.264 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.82 2.42a8.183 8.183 0 0 1 2.41 5.83c.02 4.54-3.68 8.23-8.22 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43s.17-.25.25-.41c.08-.17.04-.31-.02-.43s-.56-1.34-.76-1.84c-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.07-.1-.23-.16-.48-.27z"/>
+            </svg>
+            Grupo para Atualizações
+        </button>
+    </div>
+
+    <div class="creditos">
+        Gadelha - Versão Beta Pinguim 4.5.25
+    </div>
+
+    <script>
+        const operators = [
+            { name: "Joelson", time: "B 0530" },
+            { name: "Viviane", time: "👩 B 0530" },
+            { name: "Guilherme", time: "B 0530" },
+            { name: "Lorran", time: "👦🏻 B 0530" },
+            { name: "Rafael Silva", time: "👦🏽 B 0530" },
+            { name: "Anderson", time: "🧑🏻 B 0545" },
+            { name: "Paula", time: "👩🏾 B 0545" },
+            { name: "Vieira", time: "👩🏽‍🦲 B 0545" },
+            { name: "Lany", time: "👩 B 0545" },
+            { name: "Aparecida", time: "👩🏿‍🦱 B 0600" },
+            { name: "Edmilson", time: "👨🏻 B 0600" },
+            { name: "Gleice", time: "👩🏻 B 0600" },
+            { name: "Ruan", time: "🧔🏻 B 0600" },
+            { name: "Mirarch", time: "B 0615" },
+            { name: "Joel", time: "🧑🏻 B 0615" },
+            { name: "Carmo", time: "B 0615" },
+            { name: "Marcondes", time: "🧔🏻 B 0615" },
+            { name: "Amancio", time: "👱🏼‍♀️ B 0615" },
+            { name: "Penha", time: "👩🏻‍🦰 B 0630" },
+            { name: "Flavio", time: "🧑🏻 B 0630" },
+            { name: "Abigail", time: "👩 B 0630" },
+            { name: "Leonilda", time: "👩🏻 B 0630" },
+            { name: "Nascimento", time: "👩 B 0630" },
+            { name: "Lima", time: "👩🏻 B 0645" },
+            { name: "Joabson", time: "👨🏻 B 0645" },
+            { name: "Dulce", time: "👩🏻 B 0645" },
+            { name: "Tine", time: "👩🏻 B 0645" },
+            { name: "Magalhaes", time: "👩🏻 B 0645" },
+            { name: "Regina", time: "👩🏾‍🦱 B 0700" },
+            { name: "Henrique", time: "👦🏻 B 0700" },
+            { name: "Aline", time: "👱‍♀️ B 0700" },
+            { name: "Campos", time: "👩🏻 B 0700" },
+            { name: "Alicati", time: "👩🏻 B 0700" },
+            { name: "Tenorio", time: "👦🏻 A 0530" },
+            { name: "Assis", time: "👨🏻 A 0530" },
+            { name: "Fernando", time: "🧑🏻 A 0530" },
+            { name: "Emilly", time: "👩 A 0530" },
+            { name: "Daniela", time: "A 0545" },
+            { name: "Dourado", time: "👩 A 0545" },
+            { name: "Madalena", time: "👩‍🦰 A 0545" },
+            { name: "Jose", time: "🧔🏽 A 0545" },
+            { name: "Dias", time: "👨🏻 A 0600" },
+            { name: "Flavia", time: "👩🏾 A 0600" },
+            { name: "Bernardes", time: "👦 A 0600" },
+            { name: "Alves", time: "🧑🏽 A 0600" },
+            { name: "Juliana", time: "👩‍🦱 A 0615" },
+            { name: "Dutra", time: "🧑🏽 A 0615" },
+            { name: "Cassiano", time: "🧑🏽 A 0615" },
+            { name: "Paixão", time: "👩🏻‍🦱 A 0615" },
+            { name: "Scaramelo", time: "👩🏽 A 0630" },
+            { name: "Thalita", time: "👩🏾 A 0630" },
+            { name: "Karina", time: "👩 A 0630" },
+            { name: "Santana", time: "👩🏻 A 0630" },
+            { name: "Maicon", time: "👦🏻 A 0630" },
+            { name: "Ana Lucia", time: "👩🏻 A 0630" },
+            { name: "Maria", time: "👱‍♀️ A 0645" },
+            { name: "Arruda", time: "A 0645" },
+            { name: "Rodolfo", time: "👦🏻 A 0645" },
+            { name: "Delion", time: "👦🏻 A 0645" },
+            { name: "Fernanda", time: "👩🏻 A 0645" },
+            { name: "Leonardo", time: "👨🏽 A 0700" },
+            { name: "Ana Cristina", time: "👩🏻 A 0700" },
+            { name: "Bruna", time: "👱‍♀️ A 0700" },
+            { name: "Oliveira", time: "👦🏽 A 0700" },
+            { name: "Dantas", time: "👦🏻 A 0700" },
+            { name: "Hudson", time: "👦🏻 C 1730" },
+            { name: "Derick", time: "🧑 C 1730" },
+            { name: "Idelfonso", time: "🧔🏻 C 1730" },
+            { name: "Camargo", time: "👩🏻 C 1745" },
+            { name: "H Souza", time: "C1745" },
+            { name: "Harlly", time: "🧑 C 1745" },
+            { name: "Vinicius", time: "C 1745" },
+            { name: "Fernandes", time: "👨🏽 C 1745" },
+            { name: "Marcelo", time: "🧑🏻 C 1800" },
+            { name: "Anselmo", time: "👦🏻 C 1800" },
+            { name: "Galvão", time: "👩🏽 C 1800" },
+            { name: "Jorge", time: "👨🏻‍🦳 C 1800" },
+            { name: "Bruno", time: "🧑🏽 C 1815" },
+            { name: "Dentini", time: "🧑🏻 C 1815" },
+            { name: "Vilela", time: "👩 C 1815" },
+            { name: "Borges", time: "🧑🏽 C 1815" },
+            { name: "Frutuoso", time: "🧑🏻 C 1830" },
+            { name: "Zuleide", time: "👩 C 1830" },
+            { name: "Caroline", time: "👩🏻 C 1830" },
+            { name: "Veloz", time: "👦🏽 C 1830" },
+            { name: "Lira", time: "👩🏻 C 1845" },
+            { name: "Castrao", time: "🧑🏽 C 1845" },
+            { name: "Estefano", time: "C 1845" },
+            { name: "Freitas", time: "C 1845" },
+            { name: "January", time: "👩‍🦰 C 1830" },
+            { name: "Jairo", time: "🧑🏽 C 1900" },
+            { name: "Rubens", time: "C 1900" },
+            { name: "Helo", time: "👩 C 1900" },
+            { name: "Bonfim", time: "D 1730" },
+            { name: "Miranda", time: "D 1730" },
+            { name: "Denner", time: "👦 D 1730" },
+            { name: "Weliton", time: "👦🏻 D 1730" },
+            { name: "Matheus", time: "D 1745" },
+            { name: "Rocha", time: "🧑🏽 D 1745" },
+            { name: "Jaloto", time: "👦🏻 D 1745" },
+            { name: "Heron", time: "👦🏻 D 1745" },
+            { name: "Pafume", time: "👦🏻 D 1800" },
+            { name: "Mariano", time: "🧑🏻 D 1800" },
+            { name: "Cavalcante", time: "👦🏻 D 1800" },
+            { name: "Sousa", time: "D 1800" },
+            { name: "Ryan", time: "D 1815" },
+            { name: "Martins", time: "👩🏻‍🦲 D 1815" },
+            { name: "Luna", time: "👩 D 1815" },
+            { name: "Melo", time: "👩 D 1815" },
+            { name: "Casarotti", time: "👦🏻 D 1830" },
+            { name: "Rodrigues", time: "🧔🏻D 1830" },
+            { name: "Santos", time: "👦🏻 D 1845" },
+            { name: "Gilson", time: "🧑🏻 D 1830" },
+            { name: "Luis", time: "👨🏽 D 1845" },
+            { name: "Odair", time: "👨‍🦳 D 1845" },
+            { name: "Lopes", time: "👱🏻‍♀️ D 1845" },
+            { name: "Arielle", time: "👩🏼 D 1845" },
+            { name: "Sarah", time: "👩🏻 D 1845" },
+            { name: "Francisco", time: "👨🏻 D 1900" },
+            { name: "Sidnei", time: "🧑🏾 D 1900" },
+            { name: "Da Costa", time: "👩🏻 D 1900" },
+            { name: "Aguiar", time: "🧑🏻 D 1900" },
+            { name: "Diego", time: "🧑 SEMANAL MANHÃ 0500" },
+            { name: "Nemec", time: "👨🏻 SEMANAL MANHÃ 0500" },
+            { name: "Moreira", time: "👦🏽 SEMANAL MANHÃ 0500" },
+            { name: "Margarete", time: "👩🏾 SEMANAL MANHÃ 0500" },
+            { name: "Orvate", time: "👦🏻 SEMANAL MANHÃ 0500" },
+            { name: "Jesus", time: "👨🏽 SEMANAL MANHÃ 0515" },
+            { name: "Milena", time: "👩 SEMANAL MANHÃ 0515" },
+            { name: "Mota", time: "👦🏽 SEMANAL MANHÃ 0515" },
+            { name: "Fonseca", time: "👨🏽 SEMANAL MANHÃ 0515" },
+            { name: "Pablo", time: "🧔🏽 SEMANAL MANHÃ 0515" },
+            { name: "Agnos", time: "👦🏻 SEMANAL MANHÃ 0530" },
+            { name: "Da Silva", time: "👨🏽 SEMANAL MANHÃ 0500" },
+            { name: "Robson", time: "👩🏾‍🦲 SEMANAL TARDE 1230" },
+            { name: "Pamela", time: "👩 SEMANAL TARDE 1230" },
+            { name: "Luan", time: "🧑🏽 SEMANAL TARDE 1230" },
+            { name: "Luiza", time: "👩🏻 SEMANAL TARDE 1230" },
+            { name: "Geremias", time: "🧑🏿 SEMANAL TARDE 1230" },
+            { name: "Stephanie", time: "👩 SEMANAL TARDE 1245" },
+            { name: "T Silva", time: "🧔🏻 SEMANAL TARDE 1245" },
+            { name: "Angélica", time: "👩 SEMANAL TARDE 1300" },
+            { name: "Evelyn", time: "👩🏽 SEMANAL TARDE 1230" },
+            { name: "A Souza", time: "👩🏻 SEMANAL TARDE 1300" },
+            { name: "Cardoso", time: "👦🏽 SEMANAL TARDE 1300" },
+            { name: "Alexandre", time: "🧔🏻 SEMANAL TARDE 1300" },
+            { name: "Gadelha", time: "🧔🏻🦁 SEMANAL TARDE 1300" },
+            { name: "Rafael Tufs", time: "👱‍♂️ SEMANAL TARDE 1330" },
+            { name: "Ester", time: "👱‍♀️ SEMANAL TARDE 1330" },
+           
+            { name: "Escala", time: "💻 Geovana (Semanal tarde) 💻Fernanda (B) 💻 Léo (A) 💻 Ruama 💻 Sthephanie (C) 💻 Stringher 💻  Valéria" },
+           
+            { name: "Inspetor Tráfego", time: "📋 Bastos 📋 Cabral 📋 Winter" },
+            { name: "Supervisor de Tráfego", time: "📅 Amanda 📅 Camila 📅 Jair 📅 Lincoln 📅 Mendonça 📅 Mendes" },
+            { name: "Analista", time: "📊 Alexandre" },
+            { name: "Consolista", time: "🎙️ Camila 🎙️ Matheaus" },
+            { name: "Supervisor CCO", time: "🖋️ Fabio Silva" },
+            { name: "Diretor de Operações", time: "💼 Francisco Pierrini" },
+            { name: "Presidente", time: "✒️ Miguel Setas" }
+        ];
+            
+        const xData = [
+            { code: "40", local: "PCR" },
+            { code: "41", local: "TM3" },
+            { code: "42", local: "entre CPR e CPL" },
+            { code: "43", local: "ECR31 entre CPR e CPL" },
+            { code: "44", local: "ECR32 entre CPR e CPL" },
+            { code: "45", local: "entre GGR e STA" },
+            { code: "45P", local: "entre GGR e STA" },
+            { code: "46", local: "entre STA e LTR" },
+            { code: "47", local: "entre LTR e APN" },
+            { code: "48", local: "entre APN e ABV" },
+            { code: "49", local: "entre BRK e CPB" },
+            { code: "50", local: "entre CPB e ECT" },
+            { code: "51", local: "entre MOE e SER ESE3 e 4" },
+            { code: "52", local: "entre SCZ e CKB" },
+            { code: "53", local: "CBT" }
+        ];
+
+        const siglas = [
+            { sigla: "AM", descricao: "Modalidade Automática do CBTC" },
+            { sigla: "AFE", descricao: "Manopla de destravamento do freio de estacionamento" },
+            { sigla: "AMV", descricao: "Aparelho de mudança de via" },
+            { sigla: "AREB", descricao: "Auto Reboque" },
+            { sigla: "APLOP", descricao: "Abertura de Porta do Lado Oposto à Plataforma" },
+            { sigla: "ATS", descricao: "Supervisão Automática dos trens" },
+            { sigla: "ATP", descricao: "Proteção Automática do trem" },
+            { sigla: "BCE", descricao: "Unidade Controladora de Freios" },
+            { sigla: "BX", descricao: "Baixa Adêrencia" },
+            { sigla: "CVS", descricao: "Conversor Auxiliar" },
+            { sigla: "CBTC", descricao: "Controle de Trem Baseado em Comunicação" },
+            { sigla: "CAB CAB", descricao: "Intercomunicador entre cabines" },
+            { sigla: "CAM ESP", descricao: "Câmeras Especiais" },
+            { sigla: "CS", descricao: "Chave de Serviço" },
+            { sigla: "CEG", descricao: "Chave de energização geral" },
+            { sigla: "DATABUS", descricao: "Rede de comunicação do trem" },
+            { sigla: "CFTV", descricao: "Circuito fechado de TV (Câmeras de vigilância)" },
+            { sigla: "DPT", descricao: "Derivação de Portas" },
+            { sigla: "DDU", descricao: "Monitores de vídeo da cabine" },
+            { sigla: "DCU", descricao: "Unidade Controladora de Porta" },
+            { sigla: "DRV", descricao: "Restrição de 30km/h isolada no armário elétrico" },
+            { sigla: "FE", descricao: "Freio de Emergência" },
+            { sigla: "FFR", descricao: "Freio Falha Remoção" },
+            { sigla: "FFA", descricao: "Freio Falha Aplicação" },
+            { sigla: "FRE", descricao: "Falha Freio Remoção" },
+            { sigla: "FPI", descricao: "Freio de Emergência isolado pela chave Reboque Isolação Cabeceira" },
+            { sigla: "HSCB", descricao: "Disjuntor de proteção dos motores de tração" },
+            { sigla: "IO", descricao: "Módulo de entrada e saída" },
+            { sigla: "CO", descricao: "Chaves Operacionais" },
+            { sigla: "IC", descricao: "Isolação de Cabeceira" },
+            { sigla: "IT", descricao: "Intercomunicador" },
+            { sigla: "IPT", descricao: "Isolamento elétrico de portas" },
+            { sigla: "MCS", descricao: "Modalidade Semiautomática do CBTC" },
+            { sigla: "MAN", descricao: "Modalidade Manual" },
+            { sigla: "MVB", descricao: "Rede de comunicação de dados do trem" },
+            { sigla: "PA", descricao: "Anúncio ao Público" },
+            { sigla: "PSD", descricao: "Portas de Plataforma" },
+            { sigla: "PTT", descricao: "'Push to Talk' – Aperte para falar" },
+            { sigla: "R1", descricao: "1 carro com falha de freio (ou isolado)" },
+            { sigla: "R2", descricao: "2 carros com falha de freio (ou isolados)" },
+            { sigla: "TD", descricao: "Trem Direto" },
+            { sigla: "TG", descricao: "Taco gerador ou Tacógrafo" },
+            { sigla: "TCMS", descricao: "Sistema de Monitoramento e Controle do trem" },
+            { sigla: "V1", descricao: "Indicação de Isolação de Cabeceira" },
+            { sigla: "Intercom", descricao: "Intercomunicador" },
+            { sigla: "V6", descricao: "Indicação de Isolação de Freio Pneumático" },
+            { sigla: "VATC", descricao: "'Vehicle Automatic Train Control' – Controle automático do trem" },
+            { sigla: "RADIO", descricao: "Respeito, autonomia, desprendimento, integridade e ousadia" },
+            { sigla: "PCS", descricao: "Posto de controle setorial" },
+            { sigla: "PCL", descricao: "Posto de controle local" },
+            { sigla: "RDS", descricao: "Relatório diário de serviço" },
+            { sigla: "CCO", descricao: "Centro de controle operacional" },
+            { sigla: "SGO", descricao: "Supervisor geral de operação" },
+            { sigla: "CGM", descricao: "Console geral de manutenção" },
+            { sigla: "CEA", descricao: "Console de energia e equipamentos" },
+            { sigla: "CCT", descricao: "Console de controle de trens" },
+            { sigla: "CPS", descricao: "Console de passageiros e segurança" },
+            { sigla: "RDV", descricao: "Registro de Deslocamento Veicular" },
+            { sigla: "KPA", descricao: "Kit de proteção ambiental" },
+            { sigla: "DI", descricao: "Dispositivo detector de incêndio" },
+            { sigla: "COPESE", descricao: "Conselho Permanente de Segurança" },
+            { sigla: "RRM", descricao: "Recibo de recolhimento de mercado" },
+            { sigla: "RRB", descricao: "Recibo e recolhimento de bilhete" },
+            { sigla: "CAP", descricao: "Central de achados e perdidos" },
+            { sigla: "CGM – Trens", descricao: "Salas técnicas de sinalização" },
+            { sigla: "CEA – Sistema", descricao: "Sistema elétrico de baixa, media e alta tensão, Rede aérea, subestações, sistema de bombas, sistema de ventilação principal" },
+            { sigla: "CCT – Via", descricao: "Via permanente" },
+            { sigla: "CPS – Equipamentos", descricao: "Equipamentos de fluxo, edificações, iluminação, etc" },
+            { sigla: "PDM", descricao: "Porta deslizante motorizada" },
+            { sigla: "PCD", descricao: "Pessoa com deficiência" },
+            { sigla: "CBT", descricao: "Chácara Klabin Terminal" },
+            { sigla: "CCO", descricao: "Centro de Controle Operacional" },
+            { sigla: "ECR", descricao: "Estacionamento Capão Redondo" },
+            { sigla: "EPC", descricao: "Estacionamento Pátio Capão Redondo" },
+            { sigla: "ESE", descricao: "Estacionamento de Servidor" },
+            { sigla: "PCR", descricao: "Pátio Capão Redondo" },
+            { sigla: "PGC", descricao: "Pátio Guido Caloi" },
+            { sigla: "TF", descricao: "Zona de Transferência" },
+            { sigla: "TM3", descricao: "Terminal de Manobra Capão Redondo" },
+            { sigla: "X", descricao: "Região de Manobras" },
+            { sigla: "CPR", descricao: "Capão Redondo" },
+{ sigla: "ESTAÇÕES", descricao: "CPR - CPL - VBE - GGR - STA - LTR - APN - ABV - BGA - BRK - CPB - ECT - MOE - SER - HSP - SCZ - CKB " },
+{ sigla: "CPL", descricao: "Campo Limpo" },
+{ sigla: "VBE", descricao: "Vila das Belezas" },
+{ sigla: "GGR", descricao: "Giovanni Gronchi" },
+{ sigla: "STA", descricao: "Santo Amaro" },
+{ sigla: "LTR", descricao: "Largo Treze" },
+{ sigla: "APN", descricao: "Adolfo Pinheiro" },
+{ sigla: "ABV", descricao: "Alto da Boa Vista" },
+{ sigla: "BGA", descricao: "Borba Gato" },
+{ sigla: "BRK", descricao: "Brooklin" },
+{ sigla: "CPB", descricao: "Campo Belo" },
+{ sigla: "ECT", descricao: "Eucaliptos" },
+{ sigla: "MOE", descricao: "Moema" },
+{ sigla: "SER", descricao: "AACD - Servidor" },
+{ sigla: "HSP", descricao: "Hospital São Paulo" },
+{ sigla: "SCZ", descricao: "Santa Cruz" },
+{ sigla: "CKB", descricao: "Chácara Klabin" }, 
+     { sigla: "QAP", descricao: "Na escuta" },
+     { sigla: "QRA", descricao: "Nome e localização" },
+     { sigla: "QRX", descricao: "Aguarde na escuta" },
+     { sigla: "QSL", descricao: "Está claro, entendido" },
+     { sigla: "QSM", descricao: "Repita a mensagem" },
+     { sigla: "QTI", descricao: "Destino" },
+     { sigla: "QRU", descricao: "Ocorrência, anormalidade" },  
+            { sigla: "led console", descricao: "Portas Fechadas, Modo Manual, Fogo,Freio de Segurança Aplicado, Falha Verifique, Falha de Remoção de Freio" },
+            { sigla: "QRU01", descricao: "Vias de fato" },
+            { sigla: "QRU02", descricao: "Comércio irregular" },
+            { sigla: "QRU03", descricao: "Pedinte" },
+            { sigla: "QRU04", descricao: "Importunação sexual" },
+            { sigla: "QRU05", descricao: "Roubo" },
+            { sigla: "QRU06", descricao: "Furto" },
+            { sigla: "QRU07", descricao: "Arma branca" },
+            { sigla: "QRU08", descricao: "Tumulto" },
+            { sigla: "QRU09", descricao: "Ocorrência com arma de fogo" },
+            { sigla: "QRU10", descricao: "Falha de ar condicionado" },
+            { sigla: "QRU11", descricao: "Homem morto" },
+            { sigla: "Código A", descricao: "Acidente na via" },
+            { sigla: "Código X", descricao: "Incêndio" },
+            { sigla: "Código I", descricao: "Ocorrência na área de interligação" },
+            { sigla: "Codigo R", descricao: "Utilização do DEA" },
+            { sigla: "Ramal", descricao: "Base 505452 _ CCO 501101" },
+            { sigla: "Regras", descricao: "1 pet permissão para trabalho,2 energias perigosa,3 trabalho em altura,4 espaço confinado,5 autorização,6 epi,7 posicionamento seguro,8 sistemas de proteção,9 telefone celular,10 comunicação de acidente" },
+            { sigla: "Código R", descricao: "Utilização do DEA" },
+{ sigla: "pictograma", descricao: "Panto, inversor de tração, CVS, bateria, ar cond, portas, freio pneumático, freio estcionamento, sensor descarrila, botão soco, fogo fumaça, emergência, by pass" },
+            { sigla: "IN", descricao: "Incidente notável" },
+            { sigla: "EP", descricao: "Encanamento principal" },
+            { sigla: "Envelope", descricao: "SISTEMA PRIMÁRIO DE OCUPAÇÃO Área que o ATS (Sistema Automático de Supervisão de Trens considera ocupada por um trem. O envelope de um trem não pode se sobrepor ao de outro." },
+            { sigla: "Reservatorios", descricao: "Principal: 250 litros, Freio: 125 litros, Suspensão: 160 litros." },          
+            { sigla: "Manipulo", descricao: "Permite a saída dos usuarios em caso de emergência ou pane elétrica" },
+            { sigla: "Baliza", descricao: "Instaladas em pontos estratégicos da via. Quando o trem passa por uma baliza, lê a informação e envia sua localização exata ao CCO" },
+            { sigla: "Botao soco", descricao: "O botão está localizado na lateral de todas as portas e tem a função de permitir a abertura da porta em caso de acidente com passageiros." },     
+            { sigla: "Botão soco", descricao: "O botão está localizado na lateral de todas as portas e tem a função de permitir a abertura da porta em caso de acidente com passageiros." },   
+            { sigla: "Derivação", descricao: "A derivação é feita ao girar com chave padrão Metrô o miolo Derivação Portas, localizado no painel direito de chaves dos carros A. Tem a função de derivar (ignorar) todas as portas do trem." },  
+            { sigla: "Derivacao", descricao: "A derivação é feita ao girar com chave padrão Metrô o miolo Derivação Portas, localizado no painel direito de chaves dos carros A. Tem a função de derivar (ignorar) todas as portas do trem." }, 
+  { sigla: "PA01", descricao: "CAPÃO REDONDO - LADO DIREITO" },
+  { sigla: "PA02", descricao: "CAPÃO REDONDO - LADO ESQUERDO" },
+  { sigla: "PA03", descricao: "CAMPO LIMPO - ASSENTO PREFERENCIAL" },
+  { sigla: "PA04", descricao: "VILA DAS BELEZAS" },
+  { sigla: "PA05", descricao: "GIOVANNI GRONCHI" },
+  { sigla: "PA06", descricao: "SANTO AMARO - EMBARQUE CONSCIENTE" },
+  { sigla: "PA07", descricao: "LARGO TREZE - EMBARQUE CONSCIENTE" },
+  { sigla: "PA08", descricao: "ADOLFO PINHEIRO - ACHADOS E PERDIDOS" },
+  { sigla: "PA09", descricao: "ALTO DA BOA VISTA" },
+  { sigla: "PA10", descricao: "BORBA GATO" },
+  { sigla: "PA11", descricao: "BROOKLIN" },
+  { sigla: "PA15", descricao: "CAMPO BELO" },
+  { sigla: "PA16", descricao: "EUCALIPTOS" },
+  { sigla: "PA17", descricao: "MOEMA" },
+  { sigla: "PA18", descricao: "AACD - SERVIDOR - ASSENTO PREFERENCIAL" },
+  { sigla: "PA19", descricao: "HOSPITAL SÃO PAULO" },
+  { sigla: "PA20", descricao: "SANTA CRUZ - ELEVADORES PREFERENCIAIS" },
+  { sigla: "PA21", descricao: "CHÁCARA KLABIN - LADO DIREITO" },
+  { sigla: "PA22", descricao: "CHÁCARA KLABIN - LADO ESQUERDO" },
+  { sigla: "PA23", descricao: "NÃO ENTRE NEM SAIA APÓS AVISO SONORO" },
+  { sigla: "PA24", descricao: "SINAL SONORO DE PORTAS, RISCO DE ACIDENTES" },
+  { sigla: "PA25", descricao: "LIBERE AS PORTAS DO TREM" },
+  { sigla: "PA27", descricao: "AFASTE-SE DAS PORTAS" },
+  { sigla: "PA28", descricao: "ATENÇÃO NO EMBARQUE E DESEMBARQUE" },
+  { sigla: "PA30", descricao: "ACIONAMENTO INDEVIDO DE DISPOSITIVO DE EMERGÊNCIA" },
+  { sigla: "PA31", descricao: "DISPOSITIVO DE EMERGÊNCIA - UTILIZE O INTERCOM" },
+  { sigla: "PA32", descricao: "UTILIZE O INTERCOM PARA ATENDIMENTO" },
+  { sigla: "PA33", descricao: "EVACUAÇÃO, TREM NÃO PRESTA MAIS SERVIÇO" },
+  { sigla: "PA34", descricao: "EVACUAÇÃO EM CPR, EMBARQUE NA PLATAFORMA OPOSTA" },
+  { sigla: "PA35", descricao: "EVACUAÇÃO EM CKB, EMBARQUE NA PLATAFORMA OPOSTA" },
+  { sigla: "PA36", descricao: "EVACUAÇÃO, DIRIJA-SE PARA PARTE DE TRÁS DO TREM" },
+  { sigla: "PA37", descricao: "EVACUAÇÃO, DIRIJA-SE PARA PARTE DA FRENTE DO TREM" },
+  { sigla: "PA38", descricao: "LINHA 5 LILÁS, VELOCIDADE REDUZIDA" },
+  { sigla: "PA39", descricao: "LINHA 5 LILÁS, CIRCULAÇÃO PARALISADA MOMENTANEAMENTE" },
+  { sigla: "PA40", descricao: "LINHA 5 LILÁS, LINHA PARALISADA AGUARDE MAIS INFORMAÇÕES" },
+  { sigla: "PA41", descricao: "LINHA 5 LILÁS, OCORRÊNCIA OPERACIONAL ESTAMOS ATUANDO" },
+  { sigla: "PA42", descricao: "USUÁRIO NA VIA, VELOCIDADE REDUZIDA" },
+  { sigla: "PA43", descricao: "USUÁRIO NA VIA, CIRCULAÇÃO PARALISADA" },
+  { sigla: "PA45", descricao: "PAESE DOMINGO, LINHA 5 FECHADA" },
+  { sigla: "PA46", descricao: "LINHA 1 AZUL, VELOCIDADE REDUZIDA" },
+  { sigla: "PA47", descricao: "LINHA 1 AZUL, CIRCULAÇÃO PARALISADA" },
+  { sigla: "PA48", descricao: "LINHA 2 VERDE, VELOCIDADE REDUZIDA" },
+  { sigla: "PA49", descricao: "LINHA 2 VERDE, CIRCULAÇÃO PARALISADA" },
+  { sigla: "PA50", descricao: "LINHA 9 ESMERALDA, VELOCIDADE REDUZIDA" },
+  { sigla: "PA51", descricao: "LINHA 9 ESMERALDA, CIRCULAÇÃO PARALISADA" },
+  { sigla: "PA52", descricao: "EMBARQUE E DESEMBARQUE ORGANIZADO" },
+  { sigla: "PA53", descricao: "ASSENTOS PREFERENCIAIS" },
+  { sigla: "PA54", descricao: "ANDE DE MÃOS DADAS COM CRIANÇAS" },
+  { sigla: "PA55", descricao: "PROIBIDO SENTAR NO PISO DOS TRENS" },
+  { sigla: "PA56", descricao: "NÃO FUME" },
+  { sigla: "PA57", descricao: "MOCHILAS À FRENTE DO CORPO" },
+  { sigla: "PA58", descricao: "ESMOLAS E COMÉRCIO AMBULANTE" },
+  { sigla: "PA59", descricao: "ACHADOS E PERDIDOS" },
+  { sigla: "PA60", descricao: "ATITUDE INADEQUADA" },
+  { sigla: "PA61", descricao: "ORIENTAÇÕES CICLISTA" },
+  { sigla: "PA62", descricao: "VANDALISMO" },
+  { sigla: "PA63", descricao: "ASSÉDIO E ABUSO SEXUAL" },
+  { sigla: "PA64", descricao: "ATENTE-SE AOS SEUS PERTENCES" },
+  { sigla: "PA65", descricao: "EMBARQUE DE GRANDES VOLUMES" },
+  { sigla: "PA66", descricao: "UTILIZE NOSSOS CANAIS DE ATENDIMENTO" },
+{ sigla: "Desligar o trem de porta aberta", descricao: "Modo manual / ⁠baixar pantógrafo  / ⁠abrir portas / ⁠modo socorro / ⁠desligar o trem" },
+            { sigla: "Missão", descricao: "Melhorar a vida das pessoas através da mobilidade" },
+            { sigla: "Visão", descricao: "Ser referência em mobilidade" },
+            { sigla: "Valores", descricao: "Integridade, segurança, ética, respeito incondicional e transparência" },
+            { sigla: "Colaboradores", descricao: "🚧 Espaço reservado para Colaboradores que contribuiram, Geovana, Helo, Rocha, Regina, Marcondes" },
+            { sigla: "versão", descricao: "🤖 Número da versão , Mês, Ano" },
+            { sigla: "Desenvolvedor", descricao: "💡 Gadelha - Operador L5" },
+            { sigla: "Agradecimento", descricao: "🙏 Agradeço a Deus pela vida, pela família, pela saúde e pelos amigos que a empresa me trouxe. Cada um é um presente!" }
+        ];
+       
+        function formatTime(timeStr) {
+            if (!timeStr) return '';
+            if (timeStr.length <= 2) return timeStr;
+            if (timeStr.length === 3) return timeStr[0] + ':' + timeStr.substring(1);
+            if (timeStr.length === 4) return timeStr.substring(0, 2) + ':' + timeStr.substring(2);
+            return timeStr;
+        }
+
+        function searchOperator() {
+            const term = document.getElementById('searchOperatorInput').value.trim().toUpperCase();
+            const result = document.getElementById('operatorResultContainer');
+            const error = document.getElementById('operatorErrorMsg');
+            result.style.display = 'none';
+            error.style.display = 'none';
+
+            if (!term) {
+                error.textContent = "Por favor, digite um nome.";
+                error.style.display = 'block';
+                return;
+            }
+
+            const found = operators.find(op => op.name.toUpperCase().includes(term));
+            if (found) {
+                document.getElementById('resultName').textContent = found.name;
+                document.getElementById('resultTime').textContent = formatTime(found.time);
+                result.style.display = 'block';
+                result.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                error.textContent = `Operador "${term}" não encontrado.`;
+                error.style.display = 'block';
+            }
+        }
+
+        function searchX() {
+            const term = document.getElementById('searchXInput').value.trim().toLowerCase();
+            const result = document.getElementById('xResultContainer');
+            const error = document.getElementById('xErrorMsg');
+            result.style.display = 'none';
+            error.style.display = 'none';
+
+            if (!term) {
+                error.textContent = "Por favor, digite um código X.";
+                error.style.display = 'block';
+                return;
+            }
+
+            const found = xData.find(x => x.code.toLowerCase() === term);
+            if (found) {
+                document.getElementById('resultXCode').textContent = found.code;
+                document.getElementById('resultXLocal').textContent = found.local.toUpperCase();
+                result.style.display = 'block';
+                result.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                error.textContent = `Código "${term}" não encontrado.`;
+                error.style.display = 'block';
+            }
+        }
+
+        function searchSigla() {
+            const term = document.getElementById('searchSiglaInput').value.trim().toLowerCase();
+            const result = document.getElementById('siglaResultContainer');
+            const error = document.getElementById('siglaErrorMsg');
+            result.style.display = 'none';
+            error.style.display = 'none';
+
+            if (!term) {
+                error.textContent = "Por favor, digite uma sigla.";
+                error.style.display = 'block';
+                return;
+            }
+
+            const found = siglas.find(s => s.sigla.toLowerCase() === term);
+            if (found) {
+                document.getElementById('resultSigla').textContent = found.sigla;
+                document.getElementById('resultDescricao').textContent = found.descricao;
+                result.style.display = 'block';
+                result.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                error.textContent = `Sigla "${term}" não encontrada.`;
+                error.style.display = 'block';
+            }
+        }
+
+        function toggleFullList(listType) {
+            let listElement, tableBody;
+            
+            switch(listType) {
+                case 'operators':
+                    listElement = document.getElementById('operatorsFullList');
+                    tableBody = document.getElementById('operatorsListBody');
+                    if (tableBody.innerHTML === '') {
+                        operators.forEach(op => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `<td>${op.name}</td><td>${formatTime(op.time)}</td>`;
+                            tableBody.appendChild(row);
+                        });
+                    }
+                    break;
+                case 'xData':
+                    listElement = document.getElementById('xDataFullList');
+                    tableBody = document.getElementById('xDataListBody');
+                    if (tableBody.innerHTML === '') {
+                        xData.forEach(x => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `<td>${x.code}</td><td>${x.local.toUpperCase()}</td>`;
+                            tableBody.appendChild(row);
+                        });
+                    }
+                    break;
+                case 'siglas':
+                    listElement = document.getElementById('siglasFullList');
+                    tableBody = document.getElementById('siglasListBody');
+                    if (tableBody.innerHTML === '') {
+                        siglas.forEach(s => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `<td>${s.sigla}</td><td>${s.descricao}</td>`;
+                            tableBody.appendChild(row);
+                        });
+                    }
+                    break;
+            }
+            
+            if (listElement.style.display === 'none' || listElement.style.display === '') {
+                listElement.style.display = 'block';
+                listElement.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                listElement.style.display = 'none';
+            }
+        }
+
+        // Enter key event
+        document.getElementById('searchOperatorInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchOperator();
+        });
+        document.getElementById('searchXInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchX();
+        });
+        document.getElementById('searchSiglaInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchSigla();
+        });
+    </script>
+</body>
+</html>
